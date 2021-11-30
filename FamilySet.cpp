@@ -3,19 +3,17 @@
 #include <vector>
 
 FamilySet::FamilySet(string dictFile, int len) {
-    //This constructor opens a file with the name dictFile
-    // and pushes all words of the length len into the vector wordlist.
-    // allocating the correct memory for the wordlist vector
+    wordlist = new vector<string>; // how much memory should be allocated?
 
-    wordlist = new vector<string>; // 10? how much memory should be allocated?
-
+    // open file with name dictFile
     ifstream myFile;
-    myFile.open("dictionary.txt");
+    myFile.open(dictFile);
     string inputWord;
 
     if (!myFile.is_open())
         throw "File failed to open";
 
+    // read from file and input all the words of length len into wordlist
     while (!myFile.eof()) {
         myFile >> inputWord;
         if (inputWord.length() == len) {
@@ -32,19 +30,16 @@ FamilySet::~FamilySet() {
 }
 
 void FamilySet::setFamily(string family) {
-    // This function sets wordlist to the dictionary of the given family.
-    // This function should also clear the dictionaries.
-    // If family is not in dictionary, then setFamily should do nothing.
-
     // ensure that the iterator starts at the very beginning
     resetFamilyIter();
 
     // this while loop will find the correct family
-    while (getNextFamily() != family) {
-        getNextFamily();
+    string currFamily = getNextFamily();
+    while (currFamily != family) {
+        currFamily = getNextFamily();
     }
 
-    if (getNextFamily() == "") {
+    if (currFamily == "") {
         // at this point, it means that the family was not found
         // do nothing, return
         return;
@@ -54,7 +49,7 @@ void FamilySet::setFamily(string family) {
     // reset the old wordlist, put all the words in this family into the new wordlist
     wordlist->clear();
     // iterate through vector within the family and add all the words into wordlist
-    for (auto it = famIter->second->begin(); it != famIter->second->end(); it++) {
+    for (auto it = dictionaries[currFamily]->begin(); it != dictionaries[currFamily]->end(); it++) {
         // wordlist->push_back(it);
         wordlist->push_back(*it);
     }
@@ -64,7 +59,7 @@ void FamilySet::setFamily(string family) {
 
 
 void FamilySet::filterFamilies(string letter, string guessPattern) {
-    char tempChar = letter[0];
+    char tempChar = letter[0]; // convert letter to char
     // iterate through all the words in wordlist
     for (auto it = wordlist->begin(); it != wordlist->end(); it++) {
         int count = std::count(it->begin(), it->end(), tempChar);
@@ -96,22 +91,23 @@ void FamilySet::filterFamilies(string letter, string guessPattern) {
         }
     }
 
+    // not sure if the code below is required?
     int maxFamSize = 0;
     string maxFam;
     // ensure that the iterator starts at the beginning of the map
     resetFamilyIter();
     // find the largest family within the map
-    string tempString = getNextFamily();
-    while (tempString != "") {
-        int tempMaxFamSize = familySize(tempString);
+    string currFamily = getNextFamily();
+    while (currFamily != "") {
+        int tempMaxFamSize = familySize(currFamily);
         if (tempMaxFamSize > maxFamSize) {
             maxFamSize = tempMaxFamSize;
-            maxFam = tempString;
+            maxFam = currFamily;
         }
-        tempString = getNextFamily();
+        currFamily = getNextFamily();
     }
     resetFamilyIter();
-    setFamily(maxFam);
+    //setFamily(maxFam);
 }
 
 string FamilySet::getRandomWord()
@@ -135,21 +131,12 @@ vector<string> FamilySet::getWords() {
 }
 
 int FamilySet::familySize(string family) {
+    // iterate through the keys in the dictionary to find the correct family
     for (auto it = dictionaries.begin(); it != dictionaries.end(); it++) {
         if ((it->first) == family) {
             return it->second->size();
         }
     }
-//    resetFamilyIter();
-//    while (getNextFamily() != "") {
-//        if (getNextFamily() == family) {
-//            // at this point, the iterator will be pointing to the correct family that user wants to check the size of
-//            // return the number of words in the vector of this family by using "second" since you want to refer to the vector of the map
-//            return famIter->second->size();
-//        }
-//    }
-//    resetFamilyIter();
-    // return -1 if the family does not exist
     return -1;
 }
 
@@ -158,11 +145,11 @@ void FamilySet::resetFamilyIter() {
 }
 
 string FamilySet::getNextFamily() {
-    // If there are no more families left in the iterator (the iterator is not at the end),
-    // then this function should return the empty string.
+    // if there are no more families left to iterate over, return an empty string
     if (famIter == dictionaries.end()) {
         return "";
     }
+    // return the current family that the famIter is pointing at
     string currString = famIter->first;
     famIter++;
     return currString;
