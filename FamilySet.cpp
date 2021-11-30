@@ -1,6 +1,7 @@
 #include "FamilySet.h"
 #include <fstream>
 #include <vector>
+#include <iostream>
 
 FamilySet::FamilySet(string dictFile, int len) {
     wordlist = new vector<string>; // how much memory should be allocated?
@@ -26,7 +27,12 @@ FamilySet::FamilySet(string dictFile, int len) {
 }
 
 FamilySet::~FamilySet() {
-
+    delete wordlist;
+    // delete the vectors in dictionary since it was created using "new"
+    for (auto it1 = dictionaries.begin(); it1 != dictionaries.end(); it1++) {
+        string fam = it1->first;
+        delete dictionaries[fam];
+    }
 }
 
 void FamilySet::setFamily(string family) {
@@ -92,21 +98,21 @@ void FamilySet::filterFamilies(string letter, string guessPattern) {
     }
 
     // not sure if the code below is required?
-    int maxFamSize = 0;
-    string maxFam;
-    // ensure that the iterator starts at the beginning of the map
-    resetFamilyIter();
-    // find the largest family within the map
-    string currFamily = getNextFamily();
-    while (currFamily != "") {
-        int tempMaxFamSize = familySize(currFamily);
-        if (tempMaxFamSize > maxFamSize) {
-            maxFamSize = tempMaxFamSize;
-            maxFam = currFamily;
-        }
-        currFamily = getNextFamily();
-    }
-    resetFamilyIter();
+//    int maxFamSize = 0;
+//    string maxFam;
+//    // ensure that the iterator starts at the beginning of the map
+//    resetFamilyIter();
+//    // find the largest family within the map
+//    string currFamily = getNextFamily();
+//    while (currFamily != "") {
+//        int tempMaxFamSize = familySize(currFamily);
+//        if (tempMaxFamSize > maxFamSize) {
+//            maxFamSize = tempMaxFamSize;
+//            maxFam = currFamily;
+//        }
+//        currFamily = getNextFamily();
+//    }
+//    resetFamilyIter();
     //setFamily(maxFam);
 }
 
@@ -153,5 +159,16 @@ string FamilySet::getNextFamily() {
     string currString = famIter->first;
     famIter++;
     return currString;
+}
+
+void FamilySet::printDictionary() {
+    for (auto it1 = dictionaries.begin(); it1 != dictionaries.end(); it1++) {
+        cout << it1->first << "\t";
+        string fam = it1->first;
+        for (auto it2 = dictionaries[fam]->begin(); it2 != dictionaries[fam]->end(); it2++) {
+            cout << *it2 << " ";
+        }
+        cout << endl;
+    }
 }
 
