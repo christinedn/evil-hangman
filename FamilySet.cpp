@@ -7,7 +7,7 @@ FamilySet::FamilySet(string dictFile, int len) {
     // and pushes all words of the length len into the vector wordlist.
     // allocating the correct memory for the wordlist vector
 
-    wordlist = new vector<string>[10000]; // 10? how much memory should be allocated?
+    wordlist = new vector<string>; // 10? how much memory should be allocated?
 
     ifstream myFile;
     myFile.open("dictionary.txt");
@@ -101,13 +101,14 @@ void FamilySet::filterFamilies(string letter, string guessPattern) {
     // ensure that the iterator starts at the beginning of the map
     resetFamilyIter();
     // find the largest family within the map
-    while (getNextFamily() != "") {
-        int tempMaxFamSize = familySize(famIter->first);
+    string tempString = getNextFamily();
+    while (tempString != "") {
+        int tempMaxFamSize = familySize(tempString);
         if (tempMaxFamSize > maxFamSize) {
             maxFamSize = tempMaxFamSize;
-            maxFam = famIter->first;
+            maxFam = tempString;
         }
-        getNextFamily();
+        tempString = getNextFamily();
     }
     resetFamilyIter();
     setFamily(maxFam);
@@ -134,15 +135,20 @@ vector<string> FamilySet::getWords() {
 }
 
 int FamilySet::familySize(string family) {
-    resetFamilyIter();
-    while (getNextFamily() != "") {
-        if (getNextFamily() == family) {
-            // at this point, the iterator will be pointing to the correct family that user wants to check the size of
-            // return the number of words in the vector of this family by using "second" since you want to refer to the vector of the map
-            return famIter->second->size();
+    for (auto it = dictionaries.begin(); it != dictionaries.end(); it++) {
+        if ((it->first) == family) {
+            return it->second->size();
         }
     }
-    resetFamilyIter();
+//    resetFamilyIter();
+//    while (getNextFamily() != "") {
+//        if (getNextFamily() == family) {
+//            // at this point, the iterator will be pointing to the correct family that user wants to check the size of
+//            // return the number of words in the vector of this family by using "second" since you want to refer to the vector of the map
+//            return famIter->second->size();
+//        }
+//    }
+//    resetFamilyIter();
     // return -1 if the family does not exist
     return -1;
 }
