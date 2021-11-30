@@ -35,16 +35,14 @@ int PromptGuesses()
 
 int PromptWordLength()
 {
-    int len;
-
-    // Your code here...
+    int len = 4;
 
     return len;
 }
 
 string PromptGuess(string& guessedLetters)
 {
-    string guess = "";
+    string guess = "----";
 
     // Your code here...
 
@@ -73,7 +71,7 @@ bool isWin(string guessedProgress)
 
 void PlayEvilHangman(string file) 
 {
-    int len, guessesLeft;
+    int len = 4, guessesLeft = 10;
     string guessProgress = "";      // correctly guessed positions
     string guessedLetters = "";     // letters already guessed by user
 
@@ -112,9 +110,9 @@ void PlayEvilHangman(string file)
 int main()
 {
     string file;
-    cout << "Enter file: ";
-    cin >> file;				// Can comment out this line and include the following while developing
-    //file = "dictionary.txt";  // Convenient to hard code while developing
+    //cout << "Enter file: ";
+    //cin >> file;				// Can comment out this line and include the following while developing
+    file = "dictionary1.txt";  // Convenient to hard code while developing
 	
 	while (true) {
 		debug = PromptYesNoMessage("Turn debugging on?");
