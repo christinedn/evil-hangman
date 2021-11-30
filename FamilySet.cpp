@@ -6,11 +6,13 @@ FamilySet::FamilySet(string dictFile, int len) {
     //This constructor opens a file with the name dictFile
     // and pushes all words of the length len into the vector wordlist.
     // allocating the correct memory for the wordlist vector
-    //wordlist = new vector<string>[10]; // 10? how much memory should be allocated?
+
+    wordlist = new vector<string>[10000]; // 10? how much memory should be allocated?
 
     ifstream myFile;
     myFile.open("dictionary.txt");
     string inputWord;
+
     if (!myFile.is_open())
         throw "File failed to open";
 
@@ -19,11 +21,6 @@ FamilySet::FamilySet(string dictFile, int len) {
         if (inputWord.length() == len) {
             wordlist->push_back(inputWord);
         }
-    }
-
-    if (wordlist->empty()) {
-        // this means that there are no words in the dictionary of length len
-        throw "No words in the dictionary exists of that length";
     }
 
     myFile.close();
@@ -67,9 +64,10 @@ void FamilySet::setFamily(string family) {
 
 
 void FamilySet::filterFamilies(string letter, string guessPattern) {
+    char tempChar = letter[0];
     // iterate through all the words in wordlist
     for (auto it = wordlist->begin(); it != wordlist->end(); it++) {
-        int count = std::count(it->begin(), it->end(), letter);
+        int count = std::count(it->begin(), it->end(), tempChar);
         if (count == 0) {
             // check if family already exists
             if (dictionaries.count(guessPattern) == 0) {
@@ -150,7 +148,7 @@ int FamilySet::familySize(string family) {
 }
 
 void FamilySet::resetFamilyIter() {
-    famIter = dictionaries.begin(); // ??
+    famIter = dictionaries.begin();
 }
 
 string FamilySet::getNextFamily() {
