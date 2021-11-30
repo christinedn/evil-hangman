@@ -1,11 +1,12 @@
 #include "FamilySet.h"
 #include <fstream>
+#include <vector>
 
 FamilySet::FamilySet(string dictFile, int len) {
     //This constructor opens a file with the name dictFile
     // and pushes all words of the length len into the vector wordlist.
     // allocating the correct memory for the wordlist vector
-    wordlist = new vector<string>[10]; // 10? how much memory should be allocated?
+    //wordlist = new vector<string>[10]; // 10? how much memory should be allocated?
 
     ifstream myFile;
     myFile.open("dictionary.txt");
@@ -57,73 +58,56 @@ void FamilySet::setFamily(string family) {
     }
     resetFamilyIter();
     dictionaries.clear();
-//    resetFamilyIter();
-//    // find the correct family
-//    while (getNextFamily() != family) {
-//        getNextFamily();
-//        if (getNextFamily() == "") {
-//            // at this point, it means that the family was not found
-//            // do nothing, return
-//            return;
-//        }
-//        if (getNextFamily() == family) {
-//            // at this point, the correct family has been found
-//            // insert all the correct words from wordlist to this family
-//            // for example, if wordlist is ALLY BETA COOL DEAL ELSE FLEW GOOD HOPE IBEX
-//            // possible families: ----, -E---, --E-, E--E, ---E (if user guessed E)
-//            // compare family to the list of words in wordlist
-//            for (int i = 0; i < wordlist->size(); i++) {
-//                // compare each letter of wordlist[i] to family
-//                for (int j = 0; j < wordlist[i].length(); j++) {
-//                    if (wordlist[i][j] == family[j]) {
-//                        famIter->second.push_back(wordlist[i]);
-//                    }
-//                }
-//            }
-//        }
-//    }
-//    resetFamilyIter();
-
 }
 
 
-/*
- * 1. iterate through all the words in wordlist
- * 2. see if wordlist[i] contains letter
- * 3. if it does, create appropriate family
- *      - find how many of letter exist in wordlist[i]
- *      - save the index at which it exists so you can create the appropriate family
- *
- */
 void FamilySet::filterFamilies(string letter, string guessPattern) {
-    // cannot use index to access elements on the vector since the constructor has not correctly allocated memory for it? double check constructor
-    // maybe use an iterator instead of using index to access elements?
     // iterate through all the words in wordlist
-    int famLength = guessPattern.length();
-    string famString1;
-
-    // create a family string of only hyphens to put all the words that do not contain letter
-    for (int i = 0; i < famLength; i++) {
-        famString1.append("-");
-    }
-
-    for (int i = 0; i < wordlist->size(); i++) {
-        // find the number of times the letter occurs in the string
-        int count = std::count(wordlist[i].begin(), wordlist[i].end(), letter);
+    for (auto it = wordlist->begin(); it != wordlist->end(); it++) {
+        int count = std::count(it->begin(), it->end(), letter);
         if (count == 0) {
-            dictionaries.insert(pair<string, vector<string>*>(famString1, wordlist[i]));
+            // check if family already exists
+            if (dictionaries.count(guessPattern) == 0) {
+                vector<string>* v1 = new vector<string>;
+                //auto v1 = new vector<string>;
+                dictionaries.insert(pair<string, vector<string>*>(guessPattern, v1));
+            }
+            dictionaries[guessPattern]->push_back(*it);
+        } else {
+            string fam = guessPattern;
+            int index = 0;
+            // create appropriate family
+            for (int i = 0; i < count; i++) {
+                index = it->find(letter, index);
+                //fam[index] = (char)letter;
+                fam.replace(index, 1, letter); // change family[index] to correct letter
+                index++; // start looking for the next occurrence of the letter by incrementing index
+            }
+            // if the family doesn't exist, create a new pair (family, vector<string>*) and put it into the map
+            if (dictionaries.count(fam) == 0) {
+                vector<string>* v1 = new vector<string>;
+                //auto v1 = new vector<string>;
+                dictionaries.insert(pair<string, vector<string>*>(fam, v1));
+            }
+            dictionaries[fam]->push_back(*it);
         }
     }
 
-    /*
-     * // check if the word is part of a family
-        // std::string::npos means it is the end of the string
-        int index = wordlist->find(letter);
-        if (index != std::string::npos) { // compare guessPattern and wordlist[i] as well?
-            // this means that the letter exists in wordlist[i]
-            dictionaries.insert(pair<string, vector<string>*) (""), nullptr);
+    int maxFamSize = 0;
+    string maxFam;
+    // ensure that the iterator starts at the beginning of the map
+    resetFamilyIter();
+    // find the largest family within the map
+    while (getNextFamily() != "") {
+        int tempMaxFamSize = famIter->second->size();
+        if (tempMaxFamSize > maxFamSize) {
+            maxFamSize = tempMaxFamSize;
+            maxFam = famIter->first;
         }
-     */
+        getNextFamily();
+    }
+    resetFamilyIter();
+    setFamily(maxFam);
 }
 
 string FamilySet::getRandomWord()
