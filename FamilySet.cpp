@@ -21,6 +21,11 @@ FamilySet::FamilySet(string dictFile, int len) {
         }
     }
 
+    if (wordlist->empty()) {
+        // this means that there are no words in the dictionary of length len
+        throw "No words in the dictionary exists of that length";
+    }
+
     myFile.close();
 
 }
@@ -99,7 +104,7 @@ void FamilySet::filterFamilies(string letter, string guessPattern) {
     resetFamilyIter();
     // find the largest family within the map
     while (getNextFamily() != "") {
-        int tempMaxFamSize = famIter->second->size();
+        int tempMaxFamSize = familySize(famIter->first);
         if (tempMaxFamSize > maxFamSize) {
             maxFamSize = tempMaxFamSize;
             maxFam = famIter->first;
@@ -140,6 +145,7 @@ int FamilySet::familySize(string family) {
         }
     }
     resetFamilyIter();
+    // return -1 if the family does not exist
     return -1;
 }
 
